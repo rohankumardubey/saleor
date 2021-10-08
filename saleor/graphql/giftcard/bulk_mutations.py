@@ -1,6 +1,7 @@
+from typing import Iterable
+
 import graphene
 from django.core.exceptions import ValidationError
-from typing import Iterable
 
 from ...core.permissions import GiftcardPermissions
 from ...core.tracing import traced_atomic_transaction
@@ -134,12 +135,12 @@ class GiftCardBulkCreate(BaseMutation):
         return gift_cards
 
     @staticmethod
-    def assign_gift_card_tags(instances: Iterable[models.GiftCard], tags_values: Iterable[str]):
+    def assign_gift_card_tags(
+        instances: Iterable[models.GiftCard], tags_values: Iterable[str]
+    ):
         tags = {tag.lower() for tag in tags_values}
         tags_instances = models.GiftCardTag.objects.filter(name__in=tags)
-        tags_to_create = tags - set(
-            tags_instances.values_list("name", flat=True)
-        )
+        tags_to_create = tags - set(tags_instances.values_list("name", flat=True))
         models.GiftCardTag.objects.bulk_create(
             [models.GiftCardTag(name=tag) for tag in tags_to_create]
         )
