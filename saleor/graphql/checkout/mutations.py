@@ -619,9 +619,8 @@ class CheckoutLinesAdd(BaseMutation):
         variants = cls.get_nodes_or_error(variant_ids, "variant_id", ProductVariant)
         input_quantities = group_quantity_by_variants(lines)
 
-        checkout_info = fetch_checkout_info(checkout, [], discounts, manager)
-
         lines = fetch_checkout_lines(checkout)
+        checkout_info = fetch_checkout_info(checkout, lines, discounts, manager)
         lines = cls.clean_input(
             info,
             checkout,
@@ -632,17 +631,6 @@ class CheckoutLinesAdd(BaseMutation):
             manager,
             discounts,
             replace,
-        )
-
-        checkout_info.valid_shipping_methods = (
-            get_valid_shipping_method_list_for_checkout_info(
-                checkout_info, checkout_info.shipping_address, lines, discounts, manager
-            )
-        )
-        checkout_info.valid_pick_up_points = (
-            get_valid_collection_points_for_checkout_info(
-                checkout_info.shipping_address, lines, checkout_info
-            )
         )
 
         update_checkout_shipping_method_if_invalid(checkout_info, lines)
